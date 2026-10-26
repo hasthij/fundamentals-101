@@ -110,7 +110,7 @@ Function: Sends ICMP Echo Requests to verify if an IP address is reachable.
 Cisco Symbols: ! = Success, . = Timeout, U = Unreachable, .!!!! = First packet lost while resolving ARP.
 Extended Ping: Allows setting a specific Source IP to test if the remote target has a valid return route to your internal network.
 Traceroute (Path Mapping)
-Function: Maps every router hop to a destination by incrementing the TTL (1, 2, 3...).
+Function: Maps every router hop to a destination by incrementing the TTL (1, 2, 3...)
 How It Works: Each router along the path drops the packet when TTL hits 0 and returns an ICMP Time Exceeded message, revealing its IP address.
 OS Differences: Windows uses ICMP Echo probes; Cisco/Linux use high-port UDP probes (target replies with ICMP Port Unreachable).
 Key Output: * * * means a router timed out or a firewall blocked ICMP traffic.
