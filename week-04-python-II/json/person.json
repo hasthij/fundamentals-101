@@ -1,9 +1,0 @@
-{
-    "name": "Anna",
-    "age": 25,
-    "skills": [
-        "Python",
-        "Excel"
-    ],
-    "active": true
-}
