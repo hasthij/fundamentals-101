@@ -1,0 +1,18 @@
+{% extends "index.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+  <h1>About Us</h1>
+  <p>{{name}}</p>
+  <p>This is a simple Flask app.</p>
+  <form action="/add" method="post">
+  <label for="item">Item</label>
+  <input id="item" name="item" type="text" required>
+    <br>
+  <label for="qty">Quantity</label>
+  <input id="qty" name="qty" type="number" min="1" value="1">
+
+  <button type="submit">Add</button>
+</form>
+{% endblock %}

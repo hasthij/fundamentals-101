@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning Python Web Apps</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Literata:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a sticky chapter outline beside one calm reading column. Each chapter opens with its key idea; each part opens with a one-line summary. */
+:root{
+  --accent-light:#0f6b5c; --accent-dark:#5cc9b0;
+  --bg:#f5f7f7; --surface:#ffffff; --ink:#141b1f; --muted:#56646c;
+  --line:#dbe2e5; --code:#edf1f2; --on-accent:#ffffff;
+  --c-com:#5d6b75;--c-str:#1b6e3c;--c-kw:#8f3b9e;--c-fn:#1d56b0;--c-num:#a34a00;--c-dec:#0c6a7a;--c-tag:#b02f4a;--c-attr:#8a5200;
+  --accent:var(--accent-light);
+  --tint:color-mix(in srgb,var(--accent) 9%,var(--surface));
+  --warn:#a34a00; --warn-bg:color-mix(in srgb,#e08a2c 12%,var(--surface));
+  --font-ui:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-prose:"Literata",Georgia,"Times New Roman",serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+:root[data-accent="indigo"]{--accent-light:#3b4fc4;--accent-dark:#9aa8ff}
+:root[data-accent="graphite"]{--accent-light:#2f3a45;--accent-dark:#c3ccd6}
+:root[data-accent="ember"]{--accent-light:#b4501a;--accent-dark:#f0a068}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1317;--surface:#141b21;--ink:#e7edf1;--muted:#9aa8b2;--line:#26313a;--code:#1a232a;--on-accent:#0b1210;
+    --c-com:#8797a3;--c-str:#8fd6a0;--c-kw:#d59bf0;--c-fn:#86b4ff;--c-num:#f2b077;--c-dec:#6fd3e0;--c-tag:#ff8fa3;--c-attr:#e5c07b;
+    --accent:var(--accent-dark);--warn:#f2b077;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1317;--surface:#141b21;--ink:#e7edf1;--muted:#9aa8b2;--line:#26313a;--code:#1a232a;--on-accent:#0b1210;
+  --c-com:#8797a3;--c-str:#8fd6a0;--c-kw:#d59bf0;--c-fn:#86b4ff;--c-num:#f2b077;--c-dec:#6fd3e0;--c-tag:#ff8fa3;--c-attr:#e5c07b;
+  --accent:var(--accent-dark);--warn:#f2b077;color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--font-ui);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font-family:inherit}
+
+/* top bar */
+.top{max-width:1160px;margin:0 auto;padding:26px 24px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+h1{font-size:1.55rem;line-height:1.2;margin:0;font-weight:600;letter-spacing:-.015em;text-wrap:balance}
+.ctrl{display:flex;align-items:center;gap:12px}
+.dots{display:flex;gap:8px}
+.dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);cursor:pointer;padding:0;transition:transform .15s ease,box-shadow .15s ease}
+.dot:hover{transform:scale(1.12)}
+.dot[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.dot[data-a="pine"]{background:#0f6b5c}.dot[data-a="indigo"]{background:#3b4fc4}
+.dot[data-a="graphite"]{background:#2f3a45}.dot[data-a="ember"]{background:#b4501a}
+.mode{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:border-color .15s ease}
+.mode:hover{border-color:var(--accent)}
+.mode svg{width:18px;height:18px}
+
+/* day tabs */
+.days{max-width:1160px;margin:18px auto 0;padding:0 24px}
+nav{position:relative;display:flex;gap:4px;border-bottom:1px solid var(--line)}
+nav button{font:500 1rem var(--font-ui);color:var(--muted);background:none;border:0;padding:12px 18px;cursor:pointer;display:flex;gap:10px;align-items:center;transition:color .18s ease}
+nav button:hover,nav button[aria-selected="true"]{color:var(--ink)}
+nav .count{font:500 .74rem var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+#ind{position:absolute;left:0;bottom:-1px;height:2px;width:100px;background:var(--accent);transition:transform .3s cubic-bezier(.3,.7,.2,1),width .3s cubic-bezier(.3,.7,.2,1)}
+
+/* shell */
+.shell{max-width:1160px;margin:0 auto;padding:30px 24px 90px;display:grid;grid-template-columns:260px minmax(0,1fr);gap:56px}
+aside{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;padding-right:4px}
+.toc-box[hidden]{display:none}
+.th{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.th b{font-weight:600}
+.th span{font:500 .76rem var(--font-mono);color:var(--muted)}
+.bar{height:4px;border-radius:4px;background:var(--line);overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:100%;background:var(--accent);transform-origin:left;transform:scaleX(0);transition:transform .45s cubic-bezier(.3,.7,.2,1)}
+ol.toc{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+.toc a{display:grid;grid-template-columns:18px 1fr;gap:8px;padding:8px 10px 8px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--muted);text-decoration:none;font-size:.9rem;line-height:1.35;transition:color .15s ease,border-color .15s ease,background .15s ease}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--ink);border-left-color:var(--accent);background:var(--tint)}
+.toc .tk{width:16px;height:16px;border:1.5px solid var(--line);border-radius:50%;margin-top:2px;display:grid;place-items:center;transition:background .2s,border-color .2s}
+.toc .tk svg{width:9px;height:9px;stroke:var(--on-accent);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .2s}
+.toc a.rd .tk{background:var(--accent);border-color:var(--accent)}
+.toc a.rd .tk svg{opacity:1}
+.toc .tm{display:block;font:400 .72rem var(--font-mono);color:var(--muted);margin-top:2px}
+
+/* main */
+main{min-width:0}
+.panel[hidden]{display:none}
+.panel{animation:swap .3s cubic-bezier(.3,.7,.2,1)}
+@keyframes swap{from{transform:translateY(8px)}to{transform:none}}
+.dayhead h2{font-size:2rem;line-height:1.15;margin:0 0 10px;font-weight:600;letter-spacing:-.02em;text-wrap:balance;max-width:20ch}
+.dayhead p{font:400 1.08rem/1.6 var(--font-prose);color:var(--muted);margin:0 0 20px;max-width:56ch}
+details.terms{margin:0 0 40px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.terms summary{cursor:pointer;padding:12px 18px;font-weight:500;font-size:.95rem;list-style:none;display:flex;justify-content:space-between}
+details.terms summary::after{content:"+";color:var(--muted);font-family:var(--font-mono)}
+details.terms[open] summary::after{content:"\2212"}
+dl.tgrid{margin:0;padding:0 18px 8px;display:grid;grid-template-columns:1fr 1fr;gap:0 32px}
+dl.tgrid>div{padding:9px 0;border-top:1px solid var(--line)}
+dl.tgrid dt{font-weight:600;font-size:.9rem}
+dl.tgrid dd{margin:2px 0 0;color:var(--muted);font:400 .9rem/1.5 var(--font-prose)}
+
+/* chapter */
+.chap{scroll-margin-top:70px;padding-bottom:28px;margin-bottom:60px;border-bottom:1px solid var(--line)}
+.chap:last-of-type{border-bottom:0}
+.meta{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.clock{font:500 .85rem var(--font-mono);color:var(--accent)}
+.mins{font:400 .76rem var(--font-mono);color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:1px 9px}
+.chap h3{font-size:1.75rem;line-height:1.2;margin:0 0 8px;font-weight:600;letter-spacing:-.018em;text-wrap:balance}
+.goal{font:italic 400 1.08rem/1.55 var(--font-prose);color:var(--muted);margin:0 0 22px;max-width:56ch}
+.key{display:flex;gap:14px;background:var(--tint);border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));border-radius:12px;padding:16px 18px;margin:0 0 34px}
+.key svg{flex:none;width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+.key b{display:block;font:600 .82rem var(--font-ui);color:var(--accent);margin-bottom:2px}
+.key div{font:500 1.06rem/1.55 var(--font-prose)}
+
+.part{margin:0 0 38px}
+.part h4{font-size:1.08rem;font-weight:600;margin:0 0 6px;display:flex;align-items:center;gap:10px}
+.part h4::before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);flex:none}
+.part p.lead{font:500 1.12rem/1.5 var(--font-prose);margin:0 0 16px;max-width:58ch}
+.part p{font:400 1.02rem/1.75 var(--font-prose);margin:0 0 14px;max-width:64ch}
+code{font-family:var(--font-mono);font-size:.84em;background:var(--code);padding:1px 6px;border-radius:5px}
+b{font-weight:600}
+
+/* code */
+figure.code{margin:16px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--code)}
+figure.code figcaption{display:flex;align-items:center;gap:10px;padding:7px 10px 7px 14px;border-bottom:1px solid var(--line);font:400 .76rem var(--font-mono);color:var(--muted)}
+.fnm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lang{font-family:var(--font-ui);font-size:.74rem}
+.cp{font:500 .74rem var(--font-ui);color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:2px 10px;cursor:pointer;transition:color .15s,border-color .15s}
+.cp:hover{color:var(--ink);border-color:var(--accent)}
+figure.code pre{margin:0;padding:14px 16px;overflow-x:auto;font:400 .82rem/1.65 var(--font-mono);color:var(--ink)}
+pre code{background:none;padding:0;font-size:inherit;border-radius:0}
+.out{border-top:1px solid var(--line);padding:8px 16px;font:400 .8rem/1.5 var(--font-mono);color:var(--muted);white-space:pre-wrap}
+.out span{margin-right:12px;color:var(--accent)}
+.s-com{color:var(--c-com);font-style:italic}.s-str{color:var(--c-str)}.s-kw{color:var(--c-kw)}.s-fn{color:var(--c-fn)}
+.s-num{color:var(--c-num)}.s-dec{color:var(--c-dec)}.s-tag{color:var(--c-tag)}.s-attr{color:var(--c-attr)}
+
+/* breakdown */
+details.bd{margin:6px 0 16px}
+details.bd summary{cursor:pointer;font:600 .86rem var(--font-ui);color:var(--accent);padding:4px 0;list-style:none;display:inline-flex;gap:8px;align-items:center}
+details.bd summary::before{content:"";width:7px;height:7px;border-right:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg);transition:transform .2s}
+details.bd[open] summary::before{transform:rotate(45deg)}
+ul.bdl{list-style:none;margin:8px 0 0;padding:0 0 0 4px;border-left:2px solid var(--line)}
+ul.bdl li{padding:9px 0 9px 18px;position:relative}
+ul.bdl li code{display:inline-block;margin-bottom:3px;font-size:.8rem;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--code)}
+ul.bdl li span{display:block;font:400 .97rem/1.6 var(--font-prose);max-width:60ch}
+
+/* tables */
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:16px 0;background:var(--surface)}
+.tw table{width:100%;border-collapse:collapse;font-size:.9rem}
+.tw th,.tw td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+.tw th{font-weight:600;font-size:.82rem;color:var(--muted);background:var(--code);white-space:nowrap}
+.tw tr:last-child td{border-bottom:0}
+.tw td:first-child{font-weight:500}
+
+/* steps */
+ol.steps{counter-reset:s;list-style:none;margin:16px 0;padding:0}
+ol.steps li{counter-increment:s;position:relative;padding:4px 0 18px 46px;font:400 1.02rem/1.6 var(--font-prose)}
+ol.steps li:last-child{padding-bottom:4px}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:28px;height:28px;border:1.5px solid var(--accent);background:var(--surface);border-radius:50%;display:grid;place-items:center;font:500 .8rem var(--font-ui);color:var(--accent);z-index:1;font-variant-numeric:tabular-nums}
+ol.steps li::after{content:"";position:absolute;left:13.5px;top:30px;bottom:-2px;width:1px;background:var(--line)}
+ol.steps li:last-child::after{display:none}
+
+/* callouts */
+.note,.bad{display:flex;gap:12px;margin:18px 0;padding:13px 16px;border-radius:10px;font:400 .98rem/1.6 var(--font-prose)}
+.note{background:var(--tint);border:1px solid color-mix(in srgb,var(--accent) 25%,var(--line))}
+.bad{background:var(--warn-bg);border:1px solid color-mix(in srgb,var(--warn) 35%,var(--line))}
+.note svg,.bad svg{flex:none;width:19px;height:19px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-top:3px}
+.note svg{stroke:var(--accent)}.bad svg{stroke:var(--warn)}
+.note b,.bad b{display:block;font:600 .82rem var(--font-ui);margin-bottom:1px}
+.note b{color:var(--accent)}.bad b{color:var(--warn)}
+
+/* chapter footer */
+.chfoot{margin-top:6px}
+.read{display:inline-flex;align-items:center;gap:10px;font:500 .92rem var(--font-ui);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer;transition:border-color .15s,background .2s,color .2s}
+.read:hover{border-color:var(--accent)}
+.rb{width:18px;height:18px;border:1.5px solid var(--muted);border-radius:50%;display:grid;place-items:center;transition:background .2s,border-color .2s}
+.rb svg{width:10px;height:10px;stroke:var(--on-accent);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .3s ease .05s}
+.read[aria-pressed="true"]{background:var(--tint);border-color:var(--accent)}
+.read[aria-pressed="true"] .rb{background:var(--accent);border-color:var(--accent)}
+.read[aria-pressed="true"] .rb svg{stroke-dashoffset:0}
+
+/* checkpoints */
+.cps{scroll-margin-top:70px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin-top:20px}
+.cps h3{margin:0 0 4px;font-size:1.35rem;letter-spacing:-.01em}
+.cps .sub{font:400 .98rem var(--font-prose);color:var(--muted);margin:0 0 14px}
+.cols{display:grid;grid-template-columns:1.2fr 1fr;gap:32px}
+.cols h5{font-size:.9rem;margin:0 0 8px;font-weight:600}
+ul.done,ul.watch{list-style:none;margin:0;padding:0}
+ul.done li{border-bottom:1px solid var(--line)}ul.done li:last-child{border:0}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 0;cursor:pointer;font:400 .98rem/1.5 var(--font-prose)}
+.chk input{position:absolute;opacity:0;pointer-events:none}
+.box{flex:none;width:20px;height:20px;border:1.5px solid var(--muted);border-radius:6px;margin-top:2px;display:grid;place-items:center;transition:background .18s,border-color .18s}
+.box svg{width:12px;height:12px;stroke:var(--on-accent);stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:18;stroke-dashoffset:18;transition:stroke-dashoffset .25s ease .05s}
+.chk input:checked + .box{background:var(--accent);border-color:var(--accent)}
+.chk input:checked + .box svg{stroke-dashoffset:0}
+.chk input:checked ~ .lab{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.chk input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:2px}
+ul.watch li{padding:8px 0 8px 16px;position:relative;font:400 .94rem/1.55 var(--font-prose);color:var(--muted);border-bottom:1px solid var(--line)}
+ul.watch li:last-child{border:0}
+ul.watch li::before{content:"";position:absolute;left:0;top:18px;width:7px;height:2px;background:var(--warn)}
+
+/* responsive */
+@media (max-width:920px){
+  .shell{display:block;padding-top:18px}
+  aside{position:sticky;top:0;z-index:5;max-height:none;background:var(--bg);margin:0 -24px 22px;padding:8px 24px;border-bottom:1px solid var(--line);overflow-x:auto}
+  .th,.bar{display:none}
+  ol.toc{display:flex;gap:6px;border:0}
+  .toc a{display:block;white-space:nowrap;border:1px solid var(--line);border-radius:20px;padding:6px 14px;margin:0}
+  .toc a.on{border-color:var(--accent)}
+  .toc .tk,.toc .tm{display:none}
+  .chap h3{font-size:1.5rem}
+  .cols,dl.tgrid{grid-template-columns:1fr}
+  .dayhead h2{font-size:1.7rem}
+}
+@media (max-width:560px){.top,.days,.shell{padding-left:16px;padding-right:16px}aside{margin:0 -16px 22px;padding:8px 16px}.cps{padding:18px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Learning Python Web Apps</h1>
+  <div class="ctrl">
+    <div class="dots" role="group" aria-label="Colour theme">
+      <button class="dot" data-a="pine" aria-label="Pine" title="Pine"></button>
+      <button class="dot" data-a="indigo" aria-label="Indigo" title="Indigo"></button>
+      <button class="dot" data-a="graphite" aria-label="Graphite" title="Graphite"></button>
+      <button class="dot" data-a="ember" aria-label="Ember" title="Ember"></button>
+    </div>
+    <button class="mode" id="mode" aria-label="Switch between light and dark" title="Light or dark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+<div class="days"><nav role="tablist" aria-label="Days" id="tabs"><span id="ind"></span></nav></div>
+<div class="shell">
+  <aside id="toc" aria-label="Chapters"></aside>
+  <main id="panels"></main>
+</div>
+
+<script>
+function P(t){return {k:"p",t:t};}
+function C(n,l,c,out){return {k:"c",n:n,l:l,c:c,out:out};}
+function X(rows,title){return {k:"x",rows:rows,title:title};}
+function T(head,rows,raw){return {k:"t",head:head,rows:rows,raw:raw};}
+function S(items){return {k:"s",items:items};}
+function N(t,title){return {k:"n",t:t,title:title};}
+function B(t){return {k:"b",t:t};}
+
+var DAYS=[
+/* ===================== DAY 1 ===================== */
+{id:"day-1",name:"Day 1",goal:"How the web works, Flask pages, forms and databases",
+ sub:"Web basics, Python, Flask, forms, styling, Git, and storing data with SQL. The checkpoints at the end help you practise on a small app of your own.",
+ terms:[
+  ["Client and server","The browser asks (client). The program holding the site answers (server)."],
+  ["Request and response","One message asking, and the one message answering."],
+  ["Route","A rule that links an address such as /about to a Python function."],
+  ["Template","An HTML file with gaps that Flask fills with data."],
+  ["Virtual environment","A private toolbox of packages for one project."],
+  ["Commit","A saved snapshot of your project in Git."],
+  ["Table, row, column","A table holds records. A row is one record. A column is one property."],
+  ["Primary key","A unique number that identifies one row."],
+  ["Foreign key","A column that holds another table's primary key. It links rows."]
+ ],
+ blocks:[
+ {t:"0:00",m:20,h:"What happens when you open a web page?",
+  aim:"Read a URL, a request and a response.",
+  key:"Opening a page is one question and one answer. Everything in this course builds on that.",
+  parts:[
+  {h:"Two programs, two messages",lead:"Your browser asks. A server answers.",body:[
+   P(`Your browser is the <b>client</b>. The computer that holds the website is the <b>server</b>. The browser sends a <b>request</b>: "please give me this page". The server sends back one <b>response</b>: the page, or an error.`),
+   P(`Think of ordering at a counter. You ask, they hand it over. They do not remember you afterwards unless you show a card. That card idea comes back on Day 2.`)]},
+  {h:"Reading a URL",lead:"A URL is an address made of five parts.",body:[
+   C("One URL","txt",`https://shop.example.com:443/products/42?colour=red&page=2`),
+   T(["Piece","Name","What it means"],[
+    ["https://","scheme","How to talk. HTTPS is the secure way."],
+    ["shop.example.com","host","Which computer to ask."],
+    [":443","port","Which door on that computer. Usually hidden. Flask uses 5000."],
+    ["/products/42","path","Which page you want. Flask matches this."],
+    ["?colour=red&page=2","query string","Extra details as name=value pairs, joined by &."]])]},
+  {h:"The request",lead:"A request is a short text message from the browser.",body:[
+   C("A request","txt",`GET /products/42?colour=red HTTP/1.1
+Host: shop.example.com
+Cookie: session=abc123
+Accept: text/html`),
+   X([["GET","What you want to do."],
+      ["/products/42?colour=red","Which page, plus extra details."],
+      ["HTTP/1.1","The language version. You can ignore it."],
+      ["Host:","Which website."],
+      ["Cookie:","A small note the browser sends back each time. It lets a site recognise you."],
+      ["Accept:","What kinds of answer the browser can read."]])]},
+  {h:"What each method means",lead:"The method says what you want to do.",body:[
+   T(["Method","Means","Changes data?","Example"],[
+    ["GET","Read something","No","Open a page, search"],
+    ["POST","Send data","Yes","Submit a form"],
+    ["PUT","Replace something","Yes","Used by APIs"],
+    ["PATCH","Change part of something","Yes","Used by APIs"],
+    ["DELETE","Remove something","Yes","Used by APIs"]]),
+   N(`HTML forms can send only GET or POST. So in this course, reading is GET and anything that changes data is POST.`),
+   P(`Why does it matter? A GET is safe to repeat, so browsers reload and pre-load it. If a link deleted things, a search robot could wipe your data. A browser never repeats a POST without asking you. That is the "Confirm form resubmission" warning.`)]},
+  {h:"The response",lead:"The reply has a status number, then the content.",body:[
+   C("A response","txt",`HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 1256
+
+<html> ... the page ... </html>`),
+   X([["200 OK","The status number and its name."],
+      ["Content-Type","What the content is: a web page, an image, data."],
+      ["Content-Length","How big it is."],
+      ["Blank line, then body","The content itself. The browser draws it."]]),
+   T(["Status","Name","Plain meaning","Seen when"],[
+    ["200","OK","It worked","Every normal page"],
+    ["302","Redirect","Go to another address","After saving a form"],
+    ["400","Bad Request","The request was incomplete","A form field is missing"],
+    ["403","Forbidden","You are not allowed","Opening someone else's record"],
+    ["404","Not Found","No such address","A mistyped URL"],
+    ["405","Method Not Allowed","Wrong method for this address","POST to a GET-only route"],
+    ["500","Server Error","Your code crashed","A bug in app.py"]]),
+   P(`Look at the first digit. 2 worked. 3 go somewhere else. 4 you made a mistake. 5 the server broke.`)]}
+  ]},
+ {t:"0:20",m:35,h:"Which Python do I need?",
+  aim:"Write and read simple Python.",
+  key:"Six ideas cover everything you need: values, decisions, lists, dictionaries, loops and functions.",
+  parts:[
+  {h:"Values and variables",lead:"A variable is a name for a value.",body:[
+   P(`Write <code>age = 31</code>. Now <code>age</code> means 31. Python works out the type by itself.`),
+   T(["Type","Holds","Example"],[
+    ["int","Whole numbers","<code>age = 31</code>"],
+    ["float","Decimal numbers","<code>price = 19.99</code>"],
+    ["str","Text, in quotes","<code>name = \"Asha\"</code>"],
+    ["bool","True or False","<code>is_member = True</code>"],
+    ["None","No value","<code>nickname = None</code>"]],true),
+   P(`An <b>f-string</b> puts values into text. Put <code>f</code> before the quote and wrap names in braces.`),
+   C("f-strings","py",`name = "Asha"
+age = 31
+print(f"{name} is {age} years old")`,"Asha is 31 years old"),
+   N(`Computers store decimals slightly wrong: <code>0.1 + 0.2</code> gives <code>0.30000000000000004</code>. So store money as whole cents. Rs 450.00 is 45000. Divide by 100 only when showing it.`,"Money")]},
+  {h:"Making decisions",lead:"if runs code only when a test is true.",body:[
+   C("if, elif, else","py",`age = 17
+
+if age >= 18:
+    print("Adult")
+elif age >= 13:
+    print("Teenager")
+else:
+    print("Child")`,"Teenager"),
+   X([["if age >= 18:","The test. The colon is required."],
+      ["Indented lines","Four spaces show which lines belong to the test. Python has no braces for this."],
+      ["elif","Tried only if the earlier tests failed."],
+      ["else","Runs when nothing above matched."]]),
+   T(["Operator","Meaning"],[["==","equal to"],["!=","not equal to"],["< > <= >=","less, greater, or equal"],["and, or, not","combine tests"]]),
+   N(`One <code>=</code> stores a value. Two <code>==</code> compare. Mixing them up is the most common beginner error.`)]},
+  {h:"Lists and dictionaries",lead:"A list is items in order. A dictionary is items with labels.",body:[
+   P(`A <b>list</b> keeps items in order. Counting starts at 0.`),
+   C("A list","py",`fruits = ["apple", "banana", "cherry"]
+print(fruits[0])         # apple
+fruits.append("mango")   # add to the end
+print(len(fruits))       # 4`),
+   P(`A <b>dictionary</b> gives each value a label, called a key. It works like a form with named fields.`),
+   C("A dictionary","py",`student = {"name": "Asha", "score": 82}
+print(student["name"])       # Asha
+student["email"] = "a@x.lk"  # add or change a key`),
+   P(`Put dictionaries in a list and you have a table. Each dictionary is one row.`),
+   C("A list of dictionaries","py",`students = [
+    {"name": "Asha", "score": 82},
+    {"name": "Ravi", "score": 67},
+]`),
+   N(`Database results and web pages use exactly this shape. You will see it again in the database chapters.`)]},
+  {h:"Loops",lead:"A loop repeats code for every item.",body:[
+   C("for loops","py",`for s in students:
+    print(s["name"], s["score"])
+
+total  = sum(s["score"] for s in students)
+passed = [s for s in students if s["score"] >= 70]`),
+   X([["for s in students:","Do the indented lines once for each student. s is the current one."],
+      ["sum(... for s in students)","Adds one number from each student. Here: 149."],
+      ["[s for s in students if ...]","Builds a new list with only the students who pass the test."]])]},
+  {h:"Functions",lead:"A function is a named set of steps you can reuse.",body:[
+   C("A function","py",`def grade(score):
+    if score >= 70:
+        return "Pass"
+    return "Fail"
+
+print(grade(82))`,"Pass"),
+   X([["def grade(score):","Create a function called grade. score is a blank to fill in when you use it."],
+      ["return","Give a result back and stop."],
+      ["grade(82)","Use the function with 82. The result takes its place."]]),
+   P(`<code>return</code> gives a value back. <code>print</code> only shows text. Flask pages always return, because the returned value becomes the page.`)]}
+  ]},
+ {t:"0:55",m:30,h:"How do I create a basic web app?",
+  aim:"Install Flask, write a first app, run it.",
+  key:"A Flask app is a Python file where each function answers one web address.",
+  parts:[
+  {h:"Set up a safe workspace",lead:"A virtual environment keeps this project's packages separate.",body:[
+   P(`Think of a clean toolbox for one project. Without it, all projects share tools and they clash.`),
+   S([`Make a project folder and open a terminal inside it.`,
+      `Run <code>python -m venv .venv</code> to create the environment.`,
+      `Run <code>.venv\\Scripts\\activate</code> to switch it on (Windows). The prompt gains <code>(.venv)</code>. On macOS or Linux use <code>source .venv/bin/activate</code>.`,
+      `Run <code>pip install flask</code>.`])]},
+  {h:"The smallest Flask app",lead:"Six lines make a working website.",body:[
+   C("app.py","py",`from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello, world"`),
+   X([["from flask import Flask","Bring Flask into this file."],
+      ["app = Flask(__name__)","Create your app. __name__ tells Flask where your files are."],
+      [`@app.route("/")`,"Says: when someone visits /, run the function below."],
+      ["def home():","The function that answers. You choose its name."],
+      [`return "Hello, world"`,"What you return is what the visitor sees."]])]},
+  {h:"Run it and see it",lead:"One command starts a test server on your own computer.",body:[
+   C("Terminal","sh",`flask --app app run --debug`),
+   P(`<code>--app app</code> means "use app.py". <code>--debug</code> reloads on every save and shows helpful errors. Open <code>http://127.0.0.1:5000</code> in a browser. That address means "this computer, door 5000".`),
+   P(`Watch the terminal. Each page load prints a line:`),
+   C("Terminal output","txt",`127.0.0.1 - - [28/Oct/2026 14:02:11] "GET / HTTP/1.1" 200 -`),
+   P(`That is chapter one in action: method GET, path /, status 200. Press Ctrl+C to stop the server.`)]},
+  {h:"Adding more pages",lead:"One route for each page.",body:[
+   C("app.py","py",`@app.route("/about")
+def about():
+    return "About this site"
+
+@app.route("/hello/<name>")
+def hello(name):
+    return f"Hello, {name}"`),
+   P(`A part in angle brackets is a <b>variable</b>. Visit <code>/hello/Asha</code> and Flask runs <code>hello("Asha")</code>.`),
+   T(["You visit","Flask runs","You see"],[
+    ["/","home()","Hello, world"],
+    ["/about","about()","About this site"],
+    ["/hello/Asha","hello(\"Asha\")","Hello, Asha"],
+    ["/missing","nothing matches","404 Not Found"]]),
+   B(`Two functions with the same name cause an error. Route paths must start with a slash.`)]},
+  {h:"What happens when you visit /",lead:"Five steps, every time.",body:[
+   S([`The browser sends <code>GET /</code> to 127.0.0.1:5000.`,
+      `Flask looks for a route that matches <code>/</code>.`,
+      `It runs <code>home()</code> and takes what it returns.`,
+      `It wraps that in a response with status 200.`,
+      `The browser draws it.`])]}
+  ]},
+ {t:"1:25",m:35,h:"How do I serve an HTML file?",
+  aim:"Return real pages and understand every brace.",
+  key:"Keep HTML in a templates folder. Flask fills the gaps, then sends the finished page.",
+  parts:[
+  {h:"Why not return HTML as text?",lead:"You can, but it does not scale.",body:[
+   P(`<code>return "&lt;h1&gt;Hello&lt;/h1&gt;"</code> works. But real pages have hundreds of lines, and mixing them into Python is a mess. Keep HTML in its own files.`)]},
+  {h:"Templates",lead:"A template is an HTML file with gaps.",body:[
+   P(`Put HTML files in a folder named <code>templates</code>, next to <code>app.py</code>. <code>render_template</code> opens one, fills in the gaps with your data, and sends the result.`),
+   C("Project layout","txt",`myapp/
+  app.py
+  templates/
+    index.html
+  static/
+    style.css`),
+   C("app.py","py",`from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return render_template("index.html", title="Home", name="Asha")`),
+   C("templates/index.html","html",`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+</head>
+<body>
+  <h1>Welcome, {{ name }}</h1>
+</body>
+</html>`),
+   P(`The names you pass (<code>title</code>, <code>name</code>) become variables inside the template. This is what the browser receives:`),
+   C("What the browser receives","html",`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Home</title>
+</head>
+<body>
+  <h1>Welcome, Asha</h1>
+</body>
+</html>`),
+   N(`The browser never sees braces. Flask replaces them first. Right-click a page and choose View Source to check.`)]},
+  {h:"What the braces mean",lead:"There are three kinds of braces. That is all the syntax there is.",body:[
+   T(["Marker","Name","What it does","Example"],[
+    ["{{ ... }}","Expression","Prints a value into the page.","<code>{{ name }}</code>"],
+    ["{% ... %}","Statement","Runs logic such as a loop or an if. Prints nothing itself.","<code>{% for x in items %}</code>"],
+    ["{# ... #}","Comment","Ignored. Never sent to the browser.","<code>{# note to self #}</code>"]])]},
+  {h:"Showing data",lead:"Double braces print a value.",body:[
+   P(`A <b>filter</b> changes a value. Write it after a pipe symbol.`),
+   C("Expressions","html",`{{ student.name }}              <!-- Asha -->
+{{ student["name"] }}           <!-- Asha, same thing -->
+{{ student.score + 5 }}         <!-- 87 -->
+{{ name|upper }}                <!-- ASHA -->
+{{ items|length }}              <!-- 3 -->
+{{ nickname|default("none") }}  <!-- none, if nickname is missing -->`),
+   P(`Dot and square brackets both read a dictionary key. Jinja also makes user text safe. If someone types <code>&lt;script&gt;</code> as their name, the page shows it as plain text and does not run it.`)]},
+  {h:"Loops and conditions",lead:"Percent-braces add logic.",body:[
+   C("Loop and condition","html",`<ul>
+{% for s in students %}
+  <li>{{ s.name }}: {{ s.score }}</li>
+{% else %}
+  <li>No students yet.</li>
+{% endfor %}
+</ul>
+
+{% if user %}
+  <p>Signed in as {{ user }}</p>
+{% else %}
+  <p>Please sign in.</p>
+{% endif %}`),
+   X([["{% for s in students %}","Start a loop. Repeat until endfor, once per student."],
+      ["{% else %} inside a for","Runs only when the list is empty, so the page never looks broken."],
+      ["{% endfor %}","End the loop. Every for and if needs an end."],
+      ["{% if user %}","Show this part only if user has a value."]]),
+   P(`If students holds Asha (82) and Ravi (67), the browser receives:`),
+   C("Result","html",`<ul>
+  <li>Asha: 82</li>
+  <li>Ravi: 67</li>
+</ul>`)]},
+  {h:"Links and files",lead:"Let Flask build your addresses.",body:[
+   P(`<code>url_for</code> builds an address from a function's name. If you change a path later, your links still work. CSS and images live in a folder named <code>static</code>.`),
+   C("In a template","html",`<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<a href="{{ url_for('hello', name='Asha') }}">Greet Asha</a>`),
+   P(`The browser receives <code>/static/style.css</code> and <code>/hello/Asha</code>.`)]},
+  {h:"Reusing a layout",lead:"Write the shared parts once.",body:[
+   P(`Every page repeats the head and the navigation. Write them once in <code>base.html</code> with named gaps called <b>blocks</b>. Each page <b>extends</b> the base and fills the gaps.`),
+   C("templates/base.html","html",`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}My site{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav>
+    <a href="{{ url_for('home') }}">Home</a>
+    <a href="{{ url_for('about') }}">About</a>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>`),
+   C("templates/about.html","html",`{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+  <h1>About</h1>
+  <p>This text appears inside the main element.</p>
+{% endblock %}`),
+   B(`Content written outside a block in a child page is ignored.`)]}
+  ]},
+ {t:"2:00",m:35,h:"How do I get data from the user?",
+  aim:"Build a form, send it, read it in Flask.",
+  key:"A form sends text. Flask reads it. Then redirect, so refreshing does not save twice.",
+  parts:[
+  {h:"A form",lead:"A form is some boxes and a send button.",body:[
+   C("A form","html",`<form action="/add" method="post">
+  <label for="item">Item</label>
+  <input id="item" name="item" type="text" required>
+
+  <label for="qty">Quantity</label>
+  <input id="qty" name="qty" type="number" min="1" value="1">
+
+  <button type="submit">Add</button>
+</form>`),
+   X([["action=\"/add\"","Where to send the data. Leave it out to send to the same address."],
+      ["method=\"post\"","How to send it: get or post."],
+      ["label for=\"item\"","Links the label to the box with id item. Clicking the label selects the box."],
+      ["name=\"item\"","The label the value travels under. A box without a name sends nothing."],
+      ["type=\"number\"","The kind of box. It changes the keyboard and the checks."],
+      ["required, min","Checks the browser makes. Helpful, but not security."]]),
+   T(["Input type","Gives you"],[
+    ["text","Free text"],["number","A number"],["date","A date picker. Sends 2026-10-28"],
+    ["month","A month picker. Sends 2026-10"],["password","Hidden characters"],["email","Text with an @"],["checkbox","On or off"]])]},
+  {h:"GET or POST",lead:"The method decides where the values travel.",body:[
+   C("A GET form sends","txt",`GET /search?q=tea&page=1 HTTP/1.1`),
+   C("A POST form sends","txt",`POST /add HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+item=Milk&qty=2`),
+   T(["","GET","POST"],[
+    ["Values travel in","The address","Hidden inside the request"],
+    ["Visible in the address bar","Yes","No"],
+    ["Can be bookmarked","Yes","No"],
+    ["Use it for","Search, filters, picking a month","Add, edit, delete, log in"]],true)]},
+  {h:"Reading the data in Flask",lead:"request.args reads GET values. request.form reads POST values.",body:[
+   C("app.py","py",`from flask import request
+
+@app.route("/search")
+def search():
+    q = request.args.get("q", "")       # from ?q=...
+    return f"You searched for {q}"
+
+@app.route("/add", methods=["POST"])
+def add():
+    item = request.form["item"]          # from the POST body
+    qty = int(request.form["qty"])
+    return f"Added {qty} x {item}"`),
+   X([["request","Describes the request being handled right now."],
+      ["request.args","Values from the address. .get(key, default) uses the default if the key is missing."],
+      ["request.form","Values from a POST form. If the key is missing, Flask answers 400."],
+      ["int(...)","Form values are always text. Convert before doing sums."],
+      ["methods=[\"POST\"]","A route accepts only GET unless you list more. Without this, a form gets 405."]]),
+   P(`Always check the data on the server too. Anyone can send a request without using your form.`),
+   C("Checking input","py",`try:
+    qty = int(request.form["qty"])
+except ValueError:
+    qty = None
+
+if not qty or qty < 1:
+    ...  # show an error and stop`)]},
+  {h:"One route, two jobs",lead:"GET shows the empty form. POST receives it.",body:[
+   C("app.py","py",`@app.route("/add", methods=["GET", "POST"])
+def add():
+    if request.method == "POST":
+        items.append(request.form["item"])
+        return redirect(url_for("home"))
+    return render_template("add.html")`)]},
+  {h:"Redirect after saving",lead:"After saving, send the browser somewhere else.",body:[
+   P(`If you show a page straight after a POST, refreshing sends the form again and saves a duplicate. A <b>redirect</b> fixes this. The browser then makes a fresh GET. The pattern is called Post, Redirect, Get.`),
+   S([`The browser sends <code>POST /add</code> with the form.`,
+      `Flask saves it and answers <code>302</code> with <code>Location: /</code>.`,
+      `The browser sends <code>GET /</code> by itself.`,
+      `Flask answers <code>200</code> with the list page.`,
+      `Refreshing repeats only step 3. That is harmless.`])]},
+  {h:"A complete small app",lead:"Everything so far, in one shopping list.",body:[
+   P(`The list lives in memory, so it resets when the server restarts. A database replaces that later today. Nothing else changes.`),
+   C("app.py","py",`from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+items = []
+
+@app.route("/")
+def home():
+    return render_template("list.html", items=items)
+
+@app.route("/add", methods=["POST"])
+def add():
+    name = request.form["item"].strip()
+    if name:
+        items.append(name)
+    return redirect(url_for("home"))`),
+   C("templates/list.html","html",`{% extends "base.html" %}
+{% block content %}
+<h1>Shopping list</h1>
+
+<form action="{{ url_for('add') }}" method="post">
+  <label for="item">Item</label>
+  <input id="item" name="item" required>
+  <button type="submit">Add</button>
+</form>
+
+<ul>
+{% for i in items %}
+  <li>{{ i }}</li>
+{% else %}
+  <li>Nothing yet.</li>
+{% endfor %}
+</ul>
+{% endblock %}`)]}
+  ]},
+ {t:"2:35",m:15,h:"How do I style a page?",
+  aim:"Link a stylesheet and arrange things in a row.",
+  key:"A CSS rule picks elements and changes how they look. Flexbox puts them in a row.",
+  parts:[
+  {h:"Rules and the box model",lead:"A rule is a selector plus declarations.",body:[
+   P(`The <b>selector</b> says what to style. The <b>declarations</b> in braces say how. Link the file in the head, as the base template does.`),
+   C("static/style.css","css",`h1 {
+  color: #1f5f4a;
+  font-size: 2rem;
+}
+
+.card {
+  padding: 1rem;
+  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+}`),
+   T(["Selector","Matches"],[
+    ["h1","Every h1"],
+    [".card","Every element with <code>class=\"card\"</code>"],
+    ["#menu","The one element with <code>id=\"menu\"</code>"],
+    ["nav a","Links inside a nav"],
+    ["a:hover","A link under the pointer"]]),
+   P(`Every element is a box: the content, then <b>padding</b> inside, a <b>border</b>, and <b>margin</b> outside. <code>rem</code> is a size based on the page font, normally 16 pixels.`)]},
+  {h:"Flexbox",lead:"Flexbox arranges items in a row.",body:[
+   C("static/style.css","css",`nav {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+}`),
+   T(["Property","What it does"],[
+    ["display: flex","The children sit in a row."],
+    ["gap","Space between them."],
+    ["justify-content","Spreads them along the row."],
+    ["align-items","Lines them up across the row."],
+    ["flex-direction: column","Stacks them instead."],
+    ["margin: 0 auto","Centres a box that has a max-width."]])]}
+  ]},
+ {t:"2:50",m:10,h:"How do I save and share my code?",
+  aim:"Record snapshots with Git and put them on GitHub.",
+  key:"Git saves snapshots of your project. GitHub keeps a copy online.",
+  parts:[
+  {h:"Git in five commands",lead:"Create an empty repository on GitHub first, then run these.",body:[
+   P(`A <b>commit</b> is one saved snapshot. First add a <code>.gitignore</code>, so private and machine-specific files are never saved.`),
+   C(".gitignore","txt",`.venv/
+__pycache__/
+*.db
+.env`),
+   C("Terminal","sh",`git init
+git add .
+git commit -m "Add shopping list app"
+git branch -M main
+git remote add origin YOUR_REPO_URL
+git push -u origin main`),
+   X([["git init","Start tracking this folder."],
+      ["git add .","Pick every changed file for the next snapshot."],
+      ["git commit -m","Save the snapshot, with a message about it."],
+      ["git remote add origin","Link the folder to your GitHub repository."],
+      ["git push -u origin main","Upload. Next time, git push is enough."]]),
+   B(`Saving the <code>.venv</code> folder or a file with passwords. Add them to <code>.gitignore</code> before your first <code>git add</code>.`)]}
+  ]},
+ {t:"3:00",m:45,h:"How do I store data permanently?",
+  aim:"Understand tables, SQLite and the SQL statements.",
+  key:"A database is a set of tables. Five SQL statements create, read, change and delete the rows.",
+  parts:[
+  {h:"Why a Python list is not enough",lead:"A list vanishes when the server restarts.",body:[
+   P(`A list lives in memory. A <b>database</b> keeps data on disk, so it survives restarts. It is also fast to search and safe when many people use it.`)]},
+  {h:"Tables, rows and columns",lead:"A table is a grid. Each row is one record.",body:[
+   P(`Here are two small tables.`),
+   T(["id","name"],[["1","Stationery"],["2","Kitchen"]],true),
+   T(["id","name","price_cents","category_id"],[["1","Notebook","25000","1"],["2","Pen","8000","1"],["3","Kettle","450000","2"]],true),
+   P(`<code>id</code> is the <b>primary key</b>: a unique number for each row. <code>category_id</code> is a <b>foreign key</b>: it holds the id of a row in the other table. A product stores the number 1, not the word "Stationery". Rename the category once, and every product updates.`),
+   T(["Type","Stores"],[["INTEGER","Whole numbers, including money in cents"],["TEXT","Text, and dates like 2026-10-28"],["REAL","Decimals. Avoid for money."]],true)]},
+  {h:"SQLite",lead:"A whole database in one file.",body:[
+   P(`<b>SQLite</b> needs no separate server, and Python already includes it. That makes it ideal for learning. One catch: on some hosts the file does not survive a restart. The deployment chapter covers it.`)]},
+  {h:"Creating tables",lead:"CREATE TABLE describes the columns and the rules.",body:[
+   C("schema.sql","sql",`CREATE TABLE categories (
+  id   INTEGER PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE products (
+  id          INTEGER PRIMARY KEY,
+  name        TEXT NOT NULL,
+  price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+  category_id INTEGER NOT NULL REFERENCES categories(id)
+);`),
+   X([["INTEGER PRIMARY KEY","A unique number. SQLite fills it in for each new row."],
+      ["NOT NULL","This column is required."],
+      ["UNIQUE","No two rows may share this value."],
+      ["CHECK (price_cents >= 0)","The database refuses a row that breaks this rule."],
+      ["REFERENCES categories(id)","A foreign key. The value must match a real category."]])]},
+  {h:"The statements you will use",lead:"Create, read, change, delete.",body:[
+   C("SQL","sql",`INSERT INTO categories (name) VALUES ('Stationery');
+INSERT INTO products (name, price_cents, category_id)
+VALUES ('Notebook', 25000, 1);
+
+SELECT name, price_cents FROM products
+WHERE category_id = 1
+ORDER BY name;
+
+UPDATE products SET price_cents = 27000 WHERE id = 1;
+
+DELETE FROM products WHERE id = 2;`),
+   T(["Statement","What it does"],[
+    ["CREATE TABLE","Makes a table."],
+    ["INSERT INTO","Adds a row."],
+    ["SELECT","Reads rows. WHERE filters. ORDER BY sorts."],
+    ["UPDATE","Changes rows."],
+    ["DELETE","Removes rows."]]),
+   N(`<code>WHERE</code> picks which rows. An <code>UPDATE</code> or <code>DELETE</code> without it changes every row.`,"Danger")]},
+  {h:"Linking tables with JOIN",lead:"JOIN pairs each row with its matching row in another table.",body:[
+   C("SQL","sql",`SELECT p.name, p.price_cents, c.name AS category
+FROM products p
+JOIN categories c ON c.id = p.category_id;`),
+   X([["products p","p is a short nickname for the table."],
+      ["JOIN categories c","Bring in the categories table, nicknamed c."],
+      ["ON c.id = p.category_id","How rows match: the product's category_id equals the category's id."],
+      ["AS category","Rename this output column."]]),
+   P(`With the three sample products, the result is:`),
+   T(["name","price_cents","category"],[["Notebook","25000","Stationery"],["Pen","8000","Stationery"],["Kettle","450000","Kitchen"]],true)]}
+  ]},
+ {t:"3:45",m:35,h:"How do I use the database from Python?",
+  aim:"Run SQL safely from Python and Flask.",
+  key:"Never glue user text into SQL. Use ? placeholders and pass the values separately.",
+  parts:[
+  {h:"Connect, run, save",lead:"connect opens the file. execute runs SQL. commit saves.",body:[
+   C("Python","py",`import sqlite3
+
+db = sqlite3.connect("shop.db")
+db.row_factory = sqlite3.Row
+
+db.execute("INSERT INTO categories (name) VALUES (?)", ("Stationery",))
+db.commit()
+
+rows = db.execute("SELECT * FROM categories").fetchall()
+for r in rows:
+    print(r["id"], r["name"])
+
+db.close()`),
+   X([["sqlite3.connect(\"shop.db\")","Open the file. Create it if it is missing."],
+      ["row_factory = sqlite3.Row","Read a column by name, r[\"name\"], not by position."],
+      ["execute(sql, values)","Run one statement. Values go in a tuple. For one value write (x,) with a comma."],
+      ["commit()","Save the changes. Without it, they are thrown away."],
+      ["fetchall() / fetchone()","All matching rows as a list, or just the first row (None if there is none)."]])]},
+  {h:"Why you must use ? placeholders",lead:"Otherwise a user can type SQL of their own.",body:[
+   P(`Gluing text into SQL allows <b>SQL injection</b>. Look at this:`),
+   C("Dangerous: never do this","py",`name = request.form["name"]
+db.execute(f"SELECT * FROM users WHERE name = '{name}'")`),
+   P(`If someone types <code>' OR '1'='1</code>, the query becomes:`),
+   C("What the database receives","sql",`SELECT * FROM users WHERE name = '' OR '1'='1'`),
+   P(`That is true for every row, so it returns every user. The safe way keeps SQL and values apart:`),
+   C("Safe","py",`db.execute("SELECT * FROM users WHERE name = ?", (name,))`),
+   P(`The database treats the value as plain data, never as SQL. Rule: you write the SQL. User input goes through a <code>?</code>.`)]},
+  {h:"One connection per request in Flask",lead:"Open it when needed. Close it when the request ends.",body:[
+   P(`Flask gives you <code>g</code>, a shelf that lasts for one request. Keep the connection there.`),
+   C("app.py","py",`import sqlite3
+from flask import g
+
+def get_db():
+    if "db" not in g:
+        g.db = sqlite3.connect("shop.db")
+        g.db.row_factory = sqlite3.Row
+        g.db.execute("PRAGMA foreign_keys = ON")
+    return g.db
+
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop("db", None)
+    if db is not None:
+        db.close()
+
+def init_db():
+    with open("schema.sql") as f:
+        get_db().executescript(f.read())
+
+with app.app_context():
+    init_db()`),
+   X([["if \"db\" not in g","Open a connection only once per request."],
+      ["PRAGMA foreign_keys = ON","SQLite ignores foreign keys unless you switch them on."],
+      ["@app.teardown_appcontext","Flask runs this after every request, so connections never leak."],
+      ["executescript(f.read())","Run every statement in schema.sql. Use CREATE TABLE IF NOT EXISTS so it is safe each start."]]),
+   P(`To show rows on a page, pass them to <code>render_template</code> and loop: <code>{% for r in rows %}{{ r.name }}{% endfor %}</code>.`),
+   B(`Forgetting <code>commit()</code>. The page looks fine, but the change is lost.`)]}
+  ]}
+ ],
+ done:["Flask runs locally and pages render from templates","A form adds a record and redirects, with no duplicate on refresh","All pages extend one base.html and share a stylesheet","The project is a Git repository pushed to GitHub","You can explain GET, POST and the status codes in your own words","schema.sql creates your tables, including a users table"],
+ watch:["A form route needs <code>methods=[\"GET\", \"POST\"]</code> or it returns 405.","Template files must sit in a folder named <code>templates</code>.","Form values arrive as text. Convert before doing sums.","Never build SQL with f-strings. Use <code>?</code> placeholders."]},
+
+/* ===================== DAY 2 ===================== */
+{id:"day-2",name:"Day 2",goal:"Log in safely, summarise data, and put your app online",
+ sub:"Sessions and passwords, private data, full CRUD, reports, phone layouts, debugging, deployment and documentation. The checkpoints help you practise on a small app of your own.",
+ terms:[
+  ["Hash","A one-way scramble of a password. You can check it, never reverse it."],
+  ["Session","What the server remembers about one visitor between requests."],
+  ["Decorator","A line starting with @ that adds behaviour to the function below it."],
+  ["Aggregate","A SQL function that turns many rows into one value, such as SUM."],
+  ["GROUP BY","Splits rows into groups first, so the aggregate runs once per group."],
+  ["Query string","Values after ? in the address, such as ?month=2026-10."],
+  ["Media query","A CSS rule that applies only at certain screen sizes."],
+  ["WSGI server","A production program, such as gunicorn, that runs a Flask app."],
+  ["Environment variable","A setting from the host, kept outside your code."]
+ ],
+ blocks:[
+ {t:"0:00",m:40,h:"How do people sign up and log in?",
+  aim:"Sessions, password hashing, register, login, logout.",
+  key:"Store a scrambled hash, never the password. After login, a signed cookie tells the server who you are.",
+  parts:[
+  {h:"The problem: the web has no memory",lead:"Every request stands alone, so we need a cookie.",body:[
+   P(`After you log in, the next request carries nothing that says "same person". The fix is a <b>cookie</b>: a small value the browser stores and sends back every time. Flask's <b>session</b> keeps values in such a cookie, signed with your <code>SECRET_KEY</code> so nobody can change it.`),
+   N(`The cookie is signed, not hidden. People can read it but not edit it. Store an id in it, never a password.`,"Know the limit"),
+   S([`The browser POSTs a username and password.`,
+      `The server finds the user and checks the password against the stored hash.`,
+      `The server sets <code>session["user_id"]</code>. The reply includes a <code>Set-Cookie</code> header.`,
+      `The browser stores the cookie and sends it with every later request.`,
+      `The server reads <code>session["user_id"]</code> and knows who is asking.`])]},
+  {h:"Storing passwords: hashing",lead:"A hash can be checked but never reversed.",body:[
+   P(`A <b>hash</b> is a one-way scramble. You can test a typed password against it, but nobody can turn it back into the password. A random <b>salt</b> is mixed in, so two people with the same password get different hashes.`),
+   C("Werkzeug (installed with Flask)","py",`from werkzeug.security import generate_password_hash, check_password_hash
+
+h = generate_password_hash("my secret")
+check_password_hash(h, "my secret")   # True
+check_password_hash(h, "wrong")       # False`)]},
+  {h:"Register",lead:"Check the input, save the hash, handle a taken name.",body:[
+   C("app.py","py",`from flask import flash
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"].strip()
+        password = request.form["password"]
+        if not username or len(password) < 8:
+            flash("Enter a username and a password of 8 or more characters.")
+        else:
+            try:
+                db = get_db()
+                db.execute(
+                    "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+                    (username, generate_password_hash(password)),
+                )
+                db.commit()
+                return redirect(url_for("login"))
+            except sqlite3.IntegrityError:
+                flash("That username is taken.")
+    return render_template("register.html")`),
+   X([["flash(...)","Queue a message to show on the next page. Needs the secret key."],
+      ["sqlite3.IntegrityError","Raised when UNIQUE is broken, here because the name exists."],
+      ["generate_password_hash(...)","Saves the hash, never the typed password."]]),
+   P(`Show flashed messages once, in <code>base.html</code>:`),
+   C("templates/base.html","html",`{% for message in get_flashed_messages() %}
+  <p class="flash">{{ message }}</p>
+{% endfor %}`)]},
+  {h:"Log in and out",lead:"Find the user, check the hash, remember the id.",body:[
+   C("app.py","py",`import os
+from flask import session
+
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only-change-me")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = get_db().execute(
+            "SELECT * FROM users WHERE username = ?",
+            (request.form["username"],),
+        ).fetchone()
+        if user and check_password_hash(user["password_hash"], request.form["password"]):
+            session.clear()
+            session["user_id"] = user["id"]
+            return redirect(url_for("home"))
+        flash("Wrong username or password.")
+    return render_template("login.html")
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    return redirect(url_for("login"))`),
+   X([["os.environ.get(\"SECRET_KEY\", ...)","Read the key from the environment, so it never enters Git. The fallback is for local work only."],
+      ["session.clear()","Remove old session data before logging in."],
+      ["One message for both failures","The error does not reveal whether the username exists."],
+      ["logout uses POST","Logging out changes state, so it is a form button, not a link."]])]},
+  {h:"Protecting pages: what is a decorator?",lead:"A decorator wraps a function with extra behaviour.",body:[
+   P(`A decorator is a function that takes a function and gives back a wrapped one. <code>@shout</code> above <code>def hello</code> means <code>hello = shout(hello)</code>.`),
+   C("A tiny decorator","py",`def shout(func):
+    def wrapper():
+        print("Before")
+        func()
+        print("After")
+    return wrapper
+
+@shout
+def hello():
+    print("Hello")
+
+hello()`,"Before\nHello\nAfter"),
+   P(`<code>@app.route</code> is a decorator too. Now write one that guards a page:`),
+   C("app.py","py",`from functools import wraps
+
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+    return wrapped
+
+@app.route("/")
+@login_required
+def home():
+    ...`),
+   X([["def login_required(view)","Receives the page function."],
+      ["\"user_id\" not in session","Nobody is signed in."],
+      ["return view(*args, **kwargs)","Signed in, so run the real page."],
+      ["@wraps(view)","Keeps the function's name, which Flask needs for url_for."]]),
+   B(`Putting <code>@login_required</code> above <code>@app.route</code>. The route line goes first. <code>@login_required</code> goes directly above <code>def</code>.`)]}
+  ]},
+ {t:"0:40",m:25,h:"How do I keep each user's data private?",
+  aim:"Make sure people see only their own records.",
+  key:"Logging in is not enough. Every query must also check who owns the row.",
+  parts:[
+  {h:"Two different questions",lead:"Who are you? And what may you touch?",body:[
+   T(["","Question","Done by"],[
+    ["Authentication","Who are you?","Login and session"],
+    ["Authorisation","What may you touch?","Ownership check in every query"]],true),
+   P(`If user 1 can open <code>/notes/7</code> and that note belongs to user 2, your site leaks data, even though everyone is logged in.`)]},
+  {h:"The ownership column",lead:"Give every private row a user_id, and filter by it.",body:[
+   C("Wrong: anyone logged in can read any note","py",`db.execute("SELECT * FROM notes WHERE id = ?", (note_id,))`),
+   C("Right","py",`from flask import abort
+
+@app.route("/notes/<int:note_id>")
+@login_required
+def show_note(note_id):
+    note = get_db().execute(
+        "SELECT * FROM notes WHERE id = ? AND user_id = ?",
+        (note_id, session["user_id"]),
+    ).fetchone()
+    if note is None:
+        abort(404)
+    return render_template("note.html", note=note)`),
+   X([["AND user_id = ?","The row must also belong to the signed-in user."],
+      ["session[\"user_id\"]","The owner always comes from the session. Never trust an id sent by a form."],
+      ["abort(404)","Answer Not Found. Someone else's note looks the same as a missing one."]]),
+   N(`Test it with two accounts. Make a record as user A. Log in as user B and open its address. You must get 404.`,"Always test this")]}
+  ]},
+ {t:"1:05",m:35,h:"How do I create, read, update and delete records?",
+  aim:"Build the full CRUD cycle with one repeatable pattern.",
+  key:"Almost every feature is the same six routes: list, new, create, edit, save, delete.",
+  parts:[
+  {h:"The pattern",lead:"CRUD means create, read, update, delete.",body:[
+   P(`The example uses a <code>notes</code> table with <code>id</code>, <code>user_id</code>, <code>title</code> and <code>body</code>.`),
+   T(["Action","Address","Method","SQL"],[
+    ["List","<code>/notes</code>","GET","SELECT"],
+    ["Show new form","<code>/notes/new</code>","GET","none"],
+    ["Create","<code>/notes/new</code>","POST","INSERT"],
+    ["Show edit form","<code>/notes/&lt;id&gt;/edit</code>","GET","SELECT"],
+    ["Save changes","<code>/notes/&lt;id&gt;/edit</code>","POST","UPDATE"],
+    ["Delete","<code>/notes/&lt;id&gt;/delete</code>","POST","DELETE"]],true)]},
+  {h:"List and create",lead:"Show the user's rows. Add a new one.",body:[
+   C("app.py","py",`@app.route("/notes")
+@login_required
+def notes():
+    rows = get_db().execute(
+        "SELECT * FROM notes WHERE user_id = ? ORDER BY id DESC",
+        (session["user_id"],),
+    ).fetchall()
+    return render_template("notes.html", notes=rows)
+
+@app.route("/notes/new", methods=["GET", "POST"])
+@login_required
+def new_note():
+    if request.method == "POST":
+        title = request.form["title"].strip()
+        if title:
+            db = get_db()
+            db.execute(
+                "INSERT INTO notes (user_id, title, body) VALUES (?, ?, ?)",
+                (session["user_id"], title, request.form["body"]),
+            )
+            db.commit()
+            return redirect(url_for("notes"))
+        flash("A title is required.")
+    return render_template("note_form.html", note=None)`)]},
+  {h:"Edit and delete",lead:"Both check the owner. Delete is always a POST.",body:[
+   C("app.py","py",`@app.route("/notes/<int:note_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_note(note_id):
+    db = get_db()
+    note = db.execute(
+        "SELECT * FROM notes WHERE id = ? AND user_id = ?",
+        (note_id, session["user_id"]),
+    ).fetchone()
+    if note is None:
+        abort(404)
+    if request.method == "POST":
+        db.execute(
+            "UPDATE notes SET title = ?, body = ? WHERE id = ? AND user_id = ?",
+            (request.form["title"], request.form["body"], note_id, session["user_id"]),
+        )
+        db.commit()
+        return redirect(url_for("notes"))
+    return render_template("note_form.html", note=note)
+
+@app.route("/notes/<int:note_id>/delete", methods=["POST"])
+@login_required
+def delete_note(note_id):
+    db = get_db()
+    db.execute(
+        "DELETE FROM notes WHERE id = ? AND user_id = ?",
+        (note_id, session["user_id"]),
+    )
+    db.commit()
+    return redirect(url_for("notes"))`),
+   C("templates/note_form.html (one form for create and edit)","html",`<form method="post">
+  <label for="title">Title</label>
+  <input id="title" name="title" value="{{ note.title if note else '' }}" required>
+
+  <label for="body">Body</label>
+  <textarea id="body" name="body">{{ note.body if note else '' }}</textarea>
+
+  <button type="submit">Save</button>
+</form>`),
+   C("Delete button, inside the loop in notes.html","html",`<form method="post" action="{{ url_for('delete_note', note_id=n.id) }}">
+  <button type="submit">Delete</button>
+</form>`),
+   X([["WHERE id = ? AND user_id = ?","Both must match, so guessing another id changes nothing."],
+      ["note.title if note else ''","Fill the form when editing. Leave it empty when creating."],
+      ["Delete is a form with POST","A link is a GET, and a GET must never change data."]])]},
+  {h:"Money and dates from a form",lead:"Convert text to exact cents. Check the date is real.",body:[
+   P(`Apps that handle money store it as whole cents. A user types <code>1250.50</code>. Convert it with <code>Decimal</code>, which is exact, not <code>float</code>.`),
+   C("Python","py",`from decimal import Decimal, InvalidOperation
+from datetime import date
+
+def to_cents(text):
+    try:
+        value = Decimal(text)
+    except InvalidOperation:
+        return None
+    return int(value * 100) if value > 0 else None
+
+def valid_date(text):
+    try:
+        date.fromisoformat(text)
+        return True
+    except ValueError:
+        return False`),
+   X([["Decimal(text)","Read the text as an exact number. Fails for input such as abc."],
+      ["int(value * 100)","Rupees to cents, with no rounding error."],
+      ["date.fromisoformat(text)","Fails unless the text is a real date like 2026-10-28."],
+      ["return None","Signals bad input, so the route can show an error."]])]}
+  ]},
+ {t:"1:40",m:40,h:"How do I summarise data with SQL?",
+  aim:"Total, count and group rows, and handle empty results.",
+  key:"GROUP BY makes groups. An aggregate such as SUM turns each group into one number.",
+  parts:[
+  {h:"Aggregate functions",lead:"An aggregate turns many rows into one value.",body:[
+   P(`Use this orders table. Amounts are in cents.`),
+   T(["id","customer","amount_cents","order_date"],[
+    ["1","Asha","25000","2026-09-03"],["2","Ravi","18000","2026-09-17"],["3","Asha","42000","2026-10-02"],
+    ["4","Ravi","9000","2026-10-11"],["5","Asha","15000","2026-10-20"]],true),
+   C("SQL","sql",`SELECT COUNT(*), SUM(amount_cents), AVG(amount_cents),
+       MIN(amount_cents), MAX(amount_cents)
+FROM orders;`),
+   T(["COUNT","SUM","AVG","MIN","MAX"],[["5","109000","21800","9000","42000"]],true)]},
+  {h:"GROUP BY",lead:"First make groups. Then run the aggregate once per group.",body:[
+   C("SQL","sql",`SELECT customer, SUM(amount_cents) AS total
+FROM orders
+GROUP BY customer;`),
+   T(["customer","total"],[["Asha","82000"],["Ravi","27000"]],true),
+   P(`Asha's three orders (25000 + 42000 + 15000) became one row. Rule: every column you select must be in <code>GROUP BY</code> or inside an aggregate.`)]},
+  {h:"Grouping by month",lead:"Turn each date into year-month, then group by that.",body:[
+   P(`<code>strftime('%Y-%m', date)</code> turns <code>2026-10-02</code> into <code>2026-10</code>. <code>%Y</code> is the year and <code>%m</code> is the month.`),
+   C("SQL","sql",`SELECT strftime('%Y-%m', order_date) AS month,
+       SUM(amount_cents) AS total
+FROM orders
+GROUP BY month
+ORDER BY month;`),
+   T(["month","total"],[["2026-09","43000"],["2026-10","66000"]],true)]},
+  {h:"Conditional totals: CASE WHEN",lead:"CASE WHEN is an if inside SQL.",body:[
+   P(`Income and expenses can share a table with a <code>type</code> column. <code>CASE WHEN</code> gives the amount for matching rows and 0 for the rest, so <code>SUM</code> adds only the matches.`),
+   T(["id","type","amount_cents","date"],[
+    ["1","income","300000","2026-10-01"],["2","expense","45000","2026-10-03"],
+    ["3","expense","12000","2026-10-09"],["4","expense","30000","2026-09-20"]],true),
+   C("SQL","sql",`SELECT strftime('%Y-%m', date) AS month,
+       SUM(CASE WHEN type = 'income'  THEN amount_cents ELSE 0 END) AS income,
+       SUM(CASE WHEN type = 'expense' THEN amount_cents ELSE 0 END) AS expense
+FROM ledger
+GROUP BY month
+ORDER BY month;`),
+   T(["month","income","expense"],[["2026-09","0","30000"],["2026-10","300000","57000"]],true),
+   P(`Balance is income minus expense. Work it out in Python or in SQL.`)]},
+  {h:"JOIN with GROUP BY, and empty results",lead:"Combine tables, then total. Turn empty into zero.",body:[
+   C("Total per category","sql",`SELECT c.name, SUM(p.price_cents) AS total
+FROM products p
+JOIN categories c ON c.id = p.category_id
+GROUP BY c.name
+ORDER BY total DESC;`),
+   P(`<code>SUM</code> of no rows gives <code>NULL</code>, which Python sees as <code>None</code>. Replace it with 0 in SQL, or use <code>or 0</code> in the template.`),
+   C("SQL","sql",`SELECT COALESCE(SUM(amount_cents), 0) FROM orders WHERE customer = 'Nobody';`,"0")]}
+  ]},
+ {t:"2:20",m:25,h:"How do I build a page with a filter and totals?",
+  aim:"Pass a choice in the address and show results.",
+  key:"A GET form puts the choice in the address. Flask reads it, runs the query, and shows the result.",
+  parts:[
+  {h:"A choice in the address",lead:"A month picker sends month=2026-10.",body:[
+   P(`A form with <code>method="get"</code> puts its values in the address, so the result can be bookmarked. Flask reads them with <code>request.args</code>, and uses the current month when none was chosen. This example assumes an <code>orders</code> table with <code>user_id</code>, <code>amount_cents</code> and <code>order_date</code> columns.`),
+   C("templates/report.html","html",`<form method="get">
+  <label for="month">Month</label>
+  <input id="month" name="month" type="month" value="{{ month }}">
+  <button type="submit">Show</button>
+</form>
+
+<p>Orders: {{ totals.orders }}</p>
+<p>Total: {{ totals.total|money }}</p>`),
+   C("app.py","py",`from datetime import date
+
+@app.route("/report")
+@login_required
+def report():
+    month = request.args.get("month") or date.today().strftime("%Y-%m")
+    totals = get_db().execute(
+        "SELECT COUNT(*) AS orders, SUM(amount_cents) AS total "
+        "FROM orders WHERE user_id = ? AND strftime('%Y-%m', order_date) = ?",
+        (session["user_id"], month),
+    ).fetchone()
+    return render_template("report.html", month=month, totals=totals)`),
+   X([["request.args.get(\"month\")","Read ?month=... from the address. Gives None if it is missing."],
+      ["or date.today().strftime(\"%Y-%m\")","Use the current month when none was chosen."],
+      ["value=\"{{ month }}\"","Keeps the picker on the month being shown."],
+      ["AND strftime(...) = ?","The second ? receives the chosen month."]])]},
+  {h:"Formatting numbers",lead:"Write your own filter, then use it anywhere.",body:[
+   P(`You met filters such as <code>upper</code> on Day 1. You can write your own.`),
+   C("app.py","py",`@app.template_filter("money")
+def money(cents):
+    return f"Rs {(cents or 0) / 100:,.2f}"`),
+   X([["@app.template_filter(\"money\")","Lets you write {{ value|money }} in templates."],
+      ["cents or 0","Turns None into 0, so an empty month shows Rs 0.00."],
+      [":,.2f","Commas, and exactly two decimals. For example 1,250.50."]])]}
+  ]},
+ {t:"2:45",m:30,h:"How do I make a page work on a phone?",
+  aim:"Make a layout adapt to small screens, and test it.",
+  key:"Add the viewport tag, avoid fixed widths, and use a media query for narrow screens.",
+  parts:[
+  {h:"Tell the phone to use its real width",lead:"One line in the head.",body:[
+   P(`Without a hint, a phone draws your page as if the screen were wide, then shrinks it. This line stops that. It is already in your <code>base.html</code> from Day 1.`),
+   C("In the head","html",`<meta name="viewport" content="width=device-width, initial-scale=1">`)]},
+  {h:"Fluid layouts and media queries",lead:"Let things shrink and wrap. Add rules only for narrow screens.",body:[
+   P(`Avoid fixed widths. Use <code>max-width</code>, percentages and <code>rem</code>. A <b>media query</b> holds rules that apply only on certain screen sizes.`),
+   C("static/style.css","css",`img { max-width: 100%; }
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: .6rem; text-align: left; }
+
+@media (max-width: 600px) {
+  nav { flex-direction: column; }
+  main { padding: .75rem; }
+}`),
+   X([["max-width: 100%","An image shrinks to fit instead of overflowing."],
+      ["flex-wrap: wrap","Items move to a new line when there is no room."],
+      [".table-wrap { overflow-x: auto; }","A wide table scrolls sideways inside its wrapper. Put the table in <div class=\"table-wrap\">."],
+      ["@media (max-width: 600px)","The rules inside apply only on screens 600 pixels wide or less."]])]},
+  {h:"Test it",lead:"Use the browser's phone mode.",body:[
+   S([`Open the page in Chrome or Edge and press <code>F12</code>.`,
+      `Press <code>Ctrl+Shift+M</code> for device mode.`,
+      `Try widths around 360 and 768 pixels.`,
+      `Check that nothing scrolls sideways, text is readable, and buttons are big enough to tap, about 44 pixels.`])]}
+  ]},
+ {t:"3:15",m:20,h:"How do I read an error and find the bug?",
+  aim:"Read a traceback and recognise common errors.",
+  key:"Read the last line of an error first. Then find the nearest line that is in your own file.",
+  parts:[
+  {h:"Reading a traceback",lead:"Start at the bottom.",body:[
+   C("An error in the terminal","txt",`Traceback (most recent call last):
+  File "app.py", line 14, in add
+    qty = int(request.form["qty"])
+ValueError: invalid literal for int() with base 10: 'abc'`),
+   S([`Read the <b>last line</b> first. It names the error and explains it.`,
+      `Look at the lines above. They show the chain of calls. The one nearest the bottom that is in <b>your</b> file is where to look.`,
+      `Open that line. Here it is line 14: the text <code>abc</code> cannot become a number.`])]},
+  {h:"Errors you will meet",lead:"Most bugs are one of these.",body:[
+   T(["Error","Usual cause","Fix"],[
+    ["TemplateNotFound","File is not in templates/, or is misspelt","Check folder and spelling"],
+    ["405 Method Not Allowed","The route does not allow that method","Add methods=[\"GET\", \"POST\"]"],
+    ["400 Bad Request","The form box has no name","Add name=\"x\" to the input"],
+    ["BuildError from url_for","Wrong function name","Use the exact view name"],
+    ["no such table","schema.sql did not run, or wrong file","Run init_db, check the file name"],
+    ["IntegrityError","A UNIQUE or foreign key rule was broken","Catch it and show a message"],
+    ["UndefinedError in a template","A variable was not passed in","Pass it from the view"]]),
+   P(`Start with the terminal. Flask prints every request and every error there. With <code>--debug</code>, the browser shows the traceback too.`),
+   B(`Leaving debug mode on a public server. The debugger can run code on your server. Use it only on your own computer.`)]}
+  ]},
+ {t:"3:35",m:40,h:"How do I put my app on the internet?",
+  aim:"Know what a host needs, and deploy.",
+  key:"A host needs three things from you: a package list, a production server, and settings kept outside your code.",
+  parts:[
+  {h:"What a host needs",lead:"Your laptop is not a server. A host runs your app all day.",body:[
+   T(["Need","Why","How"],[
+    ["A list of packages","The host starts empty and must install Flask","<code>requirements.txt</code>"],
+    ["A production server","Flask's own server is for development only","<b>gunicorn</b>, a WSGI server"],
+    ["Settings outside the code","Secrets must not be in Git","<b>Environment variables</b>, such as SECRET_KEY"]],true)]},
+  {h:"The commands",lead:"Three commands cover it.",body:[
+   C("Terminal","sh",`pip install gunicorn
+pip freeze > requirements.txt
+
+# start command to enter on the host
+gunicorn app:app
+
+# generate a secret key to paste into the host's settings
+python -c "import secrets; print(secrets.token_hex(32))"`),
+   X([["pip freeze > requirements.txt","Write every installed package and its version to a file. Install gunicorn first."],
+      ["gunicorn app:app","In the file app.py, run the object named app."],
+      ["secrets.token_hex(32)","Make a random key. Save it as SECRET_KEY on the host."]]),
+   P(`gunicorn does not run on Windows, so keep using <code>flask run</code> on your laptop. The host is normally Linux.`)]},
+  {h:"The deploy flow",lead:"Push, connect, set, deploy, test.",body:[
+   S([`Push your latest code to GitHub. Check that <code>.gitignore</code> hides the database and secrets.`,
+      `On your Week 8 hosting platform, create a web service and connect the repository.`,
+      `Set the build step to install the requirements. Set the start command to <code>gunicorn app:app</code>.`,
+      `Add <code>SECRET_KEY</code> in the platform's environment settings.`,
+      `Deploy, open the public address, and register a test user.`])]},
+  {h:"Will my data survive?",lead:"Test it. Many free hosts wipe the disk on restart.",body:[
+   P(`Add a record, restart the service, and look. If the data is gone, attach a persistent disk if your platform offers one. If not, say so in the README.`),
+   P(`If the deploy fails, read the build log and the runtime log first. Usual causes: a wrong start command, a package missing from <code>requirements.txt</code>, or a missing environment variable.`)]}
+  ]},
+ {t:"4:15",m:25,h:"How do I document and present my work?",
+  aim:"Write a README and record a demo.",
+  key:"A README answers four questions: what is it, how do I run it, how does it work, what is missing.",
+  parts:[
+  {h:"The README",lead:"Short, accurate, honest.",body:[
+   C("README.md","md",`# My Web App
+
+A small web app built with Flask and SQLite.
+
+## Live demo
+https://your-app-url
+
+## Run locally
+python -m venv .venv
+.venv\\Scripts\\activate
+pip install -r requirements.txt
+flask --app app run
+
+## Database
+Tables: users, orders (see schema.sql).
+
+## Known limitations
+- No CSRF protection yet.
+- The SQLite file may reset on some hosts.`),
+   P(`Naming the limits shows careful work. It does not show weakness.`)]},
+  {h:"The demo video",lead:"Three to five minutes, one take.",body:[
+   P(`Rehearse once. Test the live site first. Record with a free screen recorder such as OBS Studio. Say what you do as you do it.`),
+   T(["Time","Show","Say"],[
+    ["0:00","Title and live URL","Who you are and what the app does"],
+    ["0:30","Register and log in","Passwords are hashed"],
+    ["1:30","Add a few records","Validation and error messages"],
+    ["2:30","The report page","How totals are calculated"],
+    ["3:30","Phone layout in device mode","The layout adapts"],
+    ["4:15","The GitHub repository","One thing you would improve"]],true)]}
+  ]}
+ ],
+ done:["Register, login and logout all work","Private pages redirect to login when signed out","Two different users see only their own records","You can create, edit and delete records","Edit and delete work for your own records only","The report page shows totals for a month you choose","The layout is usable at phone width","The live URL works from another device","README is written and the demo is recorded"],
+ watch:["Read <code>SECRET_KEY</code> from an environment variable, not from the code.","Check <code>user_id</code> on every query, or one user can read another's records.","Do not commit the database file or any secrets. Check <code>.gitignore</code>.","Many free hosts erase SQLite files on restart. Test by adding data, then restarting.","Name one known gap in the README: there is no CSRF protection yet."]}
+];
+
+
+var CHECK='<svg viewBox="0 0 12 12"><path d="M2 6.5 5 9.5 10 3"/></svg>';
+var ICON_KEY='<svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>';
+var ICON_NOTE='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>';
+var ICON_WARN='<svg viewBox="0 0 24 24"><path d="M12 3 2.5 20h19L12 3zM12 10v4.5M12 17.5h.01"/></svg>';
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+var store={get:function(k){try{return localStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,v);}catch(e){}}};
+var saved=JSON.parse(store.get("exp-done-2day")||"{}");
+
+var LANG={py:"Python",html:"HTML + Jinja",sql:"SQL",css:"CSS",sh:"Terminal",md:"Markdown",txt:"Text"};
+var FLAGS={sql:"gi",sh:"gm",md:"gm",txt:"gm"};
+var RULES={
+ py:[["com",/#[^\n]*/],["str",/[fFrRbB]{0,2}(?:"""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')/],["dec",/@[A-Za-z_][\w.]*/],["kw",/\b(?:from|import|def|return|if|elif|else|for|in|not|and|or|is|None|True|False|try|except|with|as|while|class|pass|raise|lambda)\b/],["fn",/\b[A-Za-z_]\w*(?=\()/],["num",/\b\d+(?:\.\d+)?\b/]],
+ sql:[["com",/--[^\n]*/],["str",/'(?:[^']|'')*'/],["kw",/\b(?:SELECT|FROM|WHERE|AND|OR|NOT|NULL|JOIN|ON|GROUP BY|ORDER BY|DESC|ASC|AS|INSERT INTO|VALUES|CREATE TABLE|IF NOT EXISTS|PRIMARY KEY|UNIQUE|REFERENCES|CHECK|IN|CASE|WHEN|THEN|ELSE|END|UPDATE|SET|DELETE|PRAGMA)\b/],["tag",/\b(?:INTEGER|TEXT|REAL)\b/],["fn",/\b[A-Za-z_]\w*(?=\()/],["num",/\b\d+\b/]],
+ html:[["com",/<!--[\s\S]*?-->/],["dec",/\{%[\s\S]*?%\}|\{\{[\s\S]*?\}\}/],["tag",/<\/?[A-Za-z!][\w-]*/],["str",/"[^"]*"/],["attr",/[\w:-]+(?==)/],["tag",/\/?>/]],
+ css:[["com",/\/\*[\s\S]*?\*\//],["str",/"[^"]*"|'[^']*'/],["kw",/@[\w-]+/],["attr",/[a-z-]+(?=\s*:)/],["num",/#[0-9a-fA-F]{3,8}\b/],["tag",/[.#][A-Za-z_][\w-]*/],["num",/-?\.?\d+(?:\.\d+)?(?:px|rem|em|%|vh|vw)?/]],
+ sh:[["com",/#[^\n]*/],["str",/"(?:\\.|[^"\\\n])*"|'[^']*'/],["attr",/\s--?[A-Za-z][\w-]*(?=\s|=|$)/],["fn",/^(?:git|python|pip|flask|gunicorn)\b/]],
+ md:[["kw",/^#{1,6} .*/],["fn",/`[^`]*`/]],
+ txt:[["kw",/\b(?:GET|POST)\b|HTTP\/1\.1/],["num",/\b(?:200|302|404)\b/],["attr",/^[A-Za-z-]+(?=:)/],["tag",/<\/?[A-Za-z]+>?/]]
+};
+function hl(code,lang){
+  var rules=RULES[lang]; if(!rules) return esc(code);
+  var re=new RegExp(rules.map(function(r){return "("+r[1].source+")";}).join("|"),FLAGS[lang]||"g");
+  var out="",last=0,m;
+  while((m=re.exec(code))){
+    if(m[0]===""){re.lastIndex++;continue;}
+    var k=0;for(var i=1;i<m.length;i++){if(m[i]!==undefined){k=i-1;break;}}
+    out+=esc(code.slice(last,m.index))+'<span class="s-'+rules[k][0]+'">'+esc(m[0])+'</span>';
+    last=m.index+m[0].length;
+  }
+  return out+esc(code.slice(last));
+}
+function tableHtml(t){
+  var head='<tr>'+t.head.map(function(h){return '<th>'+h+'</th>';}).join("")+'</tr>';
+  var rows=t.rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td>'+((i===0&&!t.raw)?'<code>'+esc(c)+'</code>':c)+'</td>';}).join("")+'</tr>';}).join("");
+  return '<div class="tw"><table><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div>';
+}
+function codeHtml(c){
+  return '<figure class="code"><figcaption><span class="fnm">'+esc(c.n||"")+'</span><span class="lang">'+LANG[c.l]+'</span><button type="button" class="cp">Copy</button></figcaption><pre><code>'+hl(c.c,c.l)+'</code></pre>'+(c.out?'<div class="out"><span>Output</span>'+esc(c.out)+'</div>':'')+'</figure>';
+}
+function item(it){
+  if(it.k==="p")return '<p>'+it.t+'</p>';
+  if(it.k==="c")return codeHtml(it);
+  if(it.k==="x")return '<details class="bd" open><summary>'+(it.title||"What each part means")+'</summary><ul class="bdl">'+it.rows.map(function(e){return '<li><code>'+esc(e[0])+'</code><span>'+e[1]+'</span></li>';}).join("")+'</ul></details>';
+  if(it.k==="t")return tableHtml(it);
+  if(it.k==="s")return '<ol class="steps">'+it.items.map(function(s){return '<li>'+s+'</li>';}).join("")+'</ol>';
+  if(it.k==="n")return '<div class="note">'+ICON_NOTE+'<div><b>'+(it.title||"Remember")+'</b>'+it.t+'</div></div>';
+  if(it.k==="b")return '<div class="bad">'+ICON_WARN+'<div><b>Common mistake</b>'+it.t+'</div></div>';
+  return "";
+}
+function part(pt){return '<section class="part"><h4>'+pt.h+'</h4>'+(pt.lead?'<p class="lead">'+pt.lead+'</p>':'')+pt.body.map(item).join("")+'</section>';}
+function chapter(d,x,i){
+  var id='c-'+d.id+'-'+i;
+  return '<article class="chap" id="'+id+'"><header><div class="meta"><span class="clock">'+x.t+'</span><span class="mins">'+x.m+' min</span></div><h3>'+x.h+'</h3>'+(x.aim?'<p class="goal">'+x.aim+'</p>':'')+'</header>'
+   +(x.key?'<div class="key">'+ICON_KEY+'<div><b>Key idea</b>'+x.key+'</div></div>':'')
+   +x.parts.map(part).join("")
+   +'<footer class="chfoot"><button type="button" class="read" data-c="'+id+'" aria-pressed="false"><span class="rb">'+CHECK+'</span><span>Mark chapter as read</span></button></footer></article>';
+}
+
+var tabs=document.getElementById("tabs"), panels=document.getElementById("panels"), ind=document.getElementById("ind"), tocBox=document.getElementById("toc");
+DAYS.forEach(function(d){
+  var b=document.createElement("button");
+  b.setAttribute("role","tab");b.id="t-"+d.id;b.dataset.id=d.id;b.setAttribute("aria-selected","false");
+  b.innerHTML=d.name+' <span class="count" id="cnt-'+d.id+'"></span>';
+  tabs.appendChild(b);
+
+  var s=document.createElement("section");
+  s.className="panel";s.id=d.id;s.setAttribute("role","tabpanel");s.setAttribute("aria-labelledby","t-"+d.id);s.hidden=true;
+  var terms='<details class="terms"><summary>Words you will meet today</summary><dl class="tgrid">'+d.terms.map(function(t){return '<div><dt>'+t[0]+'</dt><dd>'+t[1]+'</dd></div>';}).join("")+'</dl></details>';
+  var done=d.done.map(function(x,j){var key=d.id+"-"+j;return '<li><label class="chk"><input type="checkbox" data-k="'+key+'"><span class="box">'+CHECK+'</span><span class="lab">'+x+'</span></label></li>';}).join("");
+  var watch=d.watch.map(function(x){return '<li>'+x+'</li>';}).join("");
+  s.innerHTML='<div class="dayhead"><h2>'+d.goal+'</h2><p>'+d.sub+'</p></div>'+terms
+    +d.blocks.map(function(x,i){return chapter(d,x,i);}).join("")
+    +'<section class="cps" id="cp-'+d.id+'"><h3>Practice checkpoints</h3><p class="sub">Practise today\'s chapters on a small app of your own. Tick each when it works.</p><div class="cols"><div><h5>Done when</h5><ul class="done">'+done+'</ul></div><div><h5>Watch out</h5><ul class="watch">'+watch+'</ul></div></div></section>';
+  panels.appendChild(s);
+
+  var t=document.createElement("div");t.className="toc-box";t.id="toc-"+d.id;t.hidden=true;
+  t.innerHTML='<div class="th"><b>'+d.name+'</b><span id="tp-'+d.id+'"></span></div><div class="bar"><i id="tb-'+d.id+'"></i></div><ol class="toc">'
+    +d.blocks.map(function(x,i){var id='c-'+d.id+'-'+i;return '<li><a href="#" data-go="'+id+'" id="ti-'+id+'"><span class="tk">'+CHECK+'</span><span><span class="tt">'+x.h+'</span><span class="tm">'+x.t+' · '+x.m+' min</span></span></a></li>';}).join("")
+    +'<li><a href="#" data-go="cp-'+d.id+'" id="ti-cp-'+d.id+'"><span class="tk">'+CHECK+'</span><span><span class="tt">Practice checkpoints</span><span class="tm">Apply it</span></span></a></li></ol>';
+  tocBox.appendChild(t);
+});
+
+function progress(){
+  DAYS.forEach(function(d){
+    var n=d.blocks.length,c=0;
+    d.blocks.forEach(function(x,i){
+      var id='c-'+d.id+'-'+i,on=!!saved["r-"+id];
+      if(on)c++;
+      var a=document.getElementById("ti-"+id);if(a)a.classList.toggle("rd",on);
+      var rb=document.querySelector('.read[data-c="'+id+'"]');
+      if(rb){rb.setAttribute("aria-pressed",String(on));rb.lastElementChild.textContent=on?"Chapter read":"Mark chapter as read";}
+    });
+    document.getElementById("cnt-"+d.id).textContent=c+"/"+n;
+    document.getElementById("tp-"+d.id).textContent=c+" of "+n+" read";
+    document.getElementById("tb-"+d.id).style.transform="scaleX("+(c/n)+")";
+    var cpDone=d.done.every(function(_,j){return saved[d.id+"-"+j];});
+    document.getElementById("ti-cp-"+d.id).classList.toggle("rd",cpDone);
+  });
+  [].forEach.call(document.querySelectorAll('.chk input'),function(i){i.checked=!!saved[i.dataset.k];});
+}
+document.addEventListener("click",function(e){
+  var r=e.target.closest(".read");
+  if(r){var k="r-"+r.dataset.c;saved[k]=!saved[k];store.set("exp-done-2day",JSON.stringify(saved));progress();return;}
+  var cp=e.target.closest(".cp");
+  if(cp){
+    var txt=cp.closest("figure").querySelector("code").textContent;
+    var ok=function(v){cp.textContent=v;setTimeout(function(){cp.textContent="Copy";},1500);};
+    try{navigator.clipboard.writeText(txt).then(function(){ok("Copied");},function(){ok("Select manually");});}catch(err){ok("Select manually");}
+    return;
+  }
+  var g=e.target.closest("[data-go]");
+  if(g){e.preventDefault();var el=document.getElementById(g.dataset.go);if(el)el.scrollIntoView({block:"start"});}
+});
+panels.addEventListener("change",function(e){
+  var t=e.target;if(t.type!=="checkbox")return;
+  saved[t.dataset.k]=t.checked;store.set("exp-done-2day",JSON.stringify(saved));progress();
+});
+
+var current="day-1";
+function spy(){
+  var box=document.getElementById("toc-"+current);if(!box)return;
+  var chaps=[].slice.call(document.querySelectorAll("#"+current+" .chap, #cp-"+current));
+  var act=null;
+  chaps.forEach(function(c){if(c.getBoundingClientRect().top<150)act=c;});
+  [].forEach.call(box.querySelectorAll("a"),function(a){a.classList.toggle("on",!!act&&a.dataset.go===act.id);});
+}
+var tick=false;
+window.addEventListener("scroll",function(){if(!tick){tick=true;requestAnimationFrame(function(){spy();tick=false;});}},{passive:true});
+
+function show(id){
+  if(!DAYS.some(function(d){return d.id===id;}))id="day-1";
+  current=id;var sel=null;
+  [].forEach.call(tabs.querySelectorAll("[role=tab]"),function(b){
+    var on=b.dataset.id===id;b.setAttribute("aria-selected",String(on));b.tabIndex=on?0:-1;if(on)sel=b;
+  });
+  DAYS.forEach(function(d){document.getElementById(d.id).hidden=(d.id!==id);document.getElementById("toc-"+d.id).hidden=(d.id!==id);});
+  if(sel){ind.style.width=sel.offsetWidth+"px";ind.style.transform="translateX("+sel.offsetLeft+"px)";}
+  spy();
+}
+tabs.addEventListener("click",function(e){
+  var b=e.target.closest("[role=tab]");if(!b)return;location.hash=b.dataset.id;show(b.dataset.id);window.scrollTo(0,0);
+});
+tabs.addEventListener("keydown",function(e){
+  var list=[].slice.call(tabs.querySelectorAll("[role=tab]")),i=list.indexOf(document.activeElement);
+  if(i<0)return;
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){var n=list[(i+(e.key==="ArrowRight"?1:list.length-1))%list.length];n.focus();n.click();}
+});
+window.addEventListener("hashchange",function(){show(location.hash.slice(1));});
+window.addEventListener("resize",function(){show(current);});
+
+/* theme */
+var root=document.documentElement;
+root.dataset.theme=store.get("exp-mode")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+root.dataset.accent=store.get("exp-accent")||"pine";
+function markDots(){[].forEach.call(document.querySelectorAll(".dot"),function(d){d.setAttribute("aria-pressed",String(d.dataset.a===root.dataset.accent));});}
+document.querySelector(".dots").addEventListener("click",function(e){
+  var d=e.target.closest(".dot");if(!d)return;root.dataset.accent=d.dataset.a;store.set("exp-accent",d.dataset.a);markDots();
+});
+document.getElementById("mode").addEventListener("click",function(){
+  var n=root.dataset.theme==="dark"?"light":"dark";root.dataset.theme=n;store.set("exp-mode",n);
+});
+markDots();progress();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(function(){show(location.hash.slice(1));});
+show(location.hash.slice(1));
+</script>
+</body>
+</html>
