@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<p id="e_form title">Add Expense</p>
+<form action="addExpense" method="post">
+    <label for="description">Description:</label>
+    <input type="text" id="description" name="description" required><br>
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" name="amount" required><br>
+    <button type="submit">Add Expense</button>
+</form>
+<p id="m_form title">Add Member</p>
+<form action="addMember" method="post">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br>
+    <button type="submit">Add Member</button>
+</form>
+
+{% endblock %}

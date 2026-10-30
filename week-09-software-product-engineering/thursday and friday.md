@@ -107,3 +107,5 @@ item_name = request.form[“item”]
 items.append(item_name)
 # Redirect back to the home page (prevents resubmission on refresh)
 return redirect(url_for(“home”))
+
+Use urlfor() for linking stylesheets or any static file, to handle dynamic path to file

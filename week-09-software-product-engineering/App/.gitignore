@@ -1,0 +1,17 @@
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Python bytecode and caches
+__pycache__/
+
+# Secrets and configuration
+.env
+.env.*
+!.env.example
+
+# Databases 
+*.db
+*.sqlite
+*.sqlite3
