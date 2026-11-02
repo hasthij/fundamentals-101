@@ -1,14 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<p id="e_form title">Add Expense</p>
+<p id="e_form_title">Add Expense</p>
 <form action="addExpense" method="post">
     <label for="description">Description:</label>
     <input type="text" id="description" name="description" required><br>
     <label for="amount">Amount:</label>
-    <input type="number" id="amount" name="amount" required><br>
+    <input type="number" id="amount" name="amount" min="0" required><br>
+    <label for="m_id">Member:</label>
+    <select id="m_id" name="m_id" required>
+        {% for m in members %}
+        <option value="{{ m['m_id'] }}">{{ m['name'] }}</option>
+        {% endfor %}
+    </select><br>
     <button type="submit">Add Expense</button>
 </form>
-<p id="m_form title">Add Member</p>
+<p id="m_form_title">Add Member</p>
 <form action="addMember" method="post">
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required><br>
