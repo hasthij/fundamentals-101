@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-{% block content %}
-<table>
-    <tr><th>Member</th><th>Total</th></tr>
-    {% for t in totals %}
-    <tr><td>{{ t['name'] }}</td><td>{{ t['total'] }}</td></tr>
-    {% endfor %}
-</table>
-{% endblock %}
