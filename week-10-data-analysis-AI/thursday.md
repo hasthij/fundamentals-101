@@ -177,7 +177,7 @@ used to rename rows and coloumn header names
 joining and concatenating
 
 Concatenating
-canadian_youtube = pd.read_csv("../input/youtube-new/CAvideos.csv")
+canadian_youtube = pd.read_csv("../input/youtube-new/CAvideos.csv") 
 british_youtube = pd.read_csv("../input/youtube-new/GBvideos.csv")
 
 pd.concat([canadian_youtube, british_youtube])
